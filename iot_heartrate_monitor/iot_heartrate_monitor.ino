@@ -4,22 +4,22 @@
 #include <ThingSpeak.h>
 
 
-const char ssid[] = "C1F3R";
-const char password[] = "314159265";
+const char ssid[] = "نام شبکه وای فای شما";
+const char password[] = "رمز وای فای شما";
 WiFiClient client;
 
-const long CHANNEL = 1222839;
-const char *WRITE_API = "MOF12ZGK61DKYH08";
+const long CHANNEL = Your ThingSpeak Channel ID;  //در این قسمت id دشبورد ایجاد شده را وارد کنید
+const char *WRITE_API = "شناسه دشبور شما";
 
 long prevMillisThingSpeak = 0;
-int intervalThingSpeak = 20000; // Minimum ThingSpeak write interval is 15 seconds
+int intervalThingSpeak = 20000; // 15 ثانیه برای ارسال دیتا به دشبورد
 
 
 const int OUTPUT_TYPE = SERIAL_PLOTTER;
 const int PULSE_INPUT = 32;   
-const int PULSE_BLINK = 21;    // 
+const int PULSE_BLINK = 21;    
 const int PULSE_FADE = 5;
-const int THRESHOLD = 550;   // Adjust this number to avoid noise when idle
+const int THRESHOLD = 550;   
 
 byte samplesUntilReport;
 const byte SAMPLES_PER_SERIAL_SAMPLE = 10;
@@ -31,7 +31,6 @@ void setup() {
 
   Serial.begin(115200);
   
-   // Configure the PulseSensor manager.
   pulseSensor.analogInput(PULSE_INPUT);
   pulseSensor.blinkOnPulse(PULSE_BLINK);
   pulseSensor.fadeOnPulse(PULSE_FADE);
@@ -41,14 +40,11 @@ void setup() {
   pulseSensor.setOutputType(OUTPUT_TYPE);
   pulseSensor.setThreshold(THRESHOLD);
 
-  // Skip the first SAMPLES_PER_SERIAL_SAMPLE in the loop().
   samplesUntilReport = SAMPLES_PER_SERIAL_SAMPLE;
   
-  // Now that everything is ready, start reading the PulseSensor signal.
   if (!pulseSensor.begin()) {
   
     for(;;) {
-      // Flash the led to show things didn't work.
       digitalWrite(PULSE_BLINK, LOW);
       delay(50);
       digitalWrite(PULSE_BLINK, HIGH);
@@ -56,7 +52,7 @@ void setup() {
     }
   }
   WiFi.mode(WIFI_STA);
-  ThingSpeak.begin(client);  // Initialize ThingSpeak
+  ThingSpeak.begin(client);  
   
   if (WiFi.status() != WL_CONNECTED) {
     Serial.print("Attempting to connect to SSID: ");
@@ -91,10 +87,8 @@ void loop() {
     if (myBPM < 100 && myBPM > 50){
       if (millis() - prevMillisThingSpeak > intervalThingSpeak) {
 
-      // Set the fields with the values
       ThingSpeak.setField(1, myBPM);
     
-      // Write to the ThingSpeak channel
       int x = ThingSpeak.writeFields(CHANNEL, WRITE_API);
       if (x == 200) {
         Serial.println("Channel update successful.");
@@ -104,18 +98,7 @@ void loop() {
       }
 
         prevMillisThingSpeak = millis();
-      }  
-      
-    }
-
-    /*******
-      Here is a good place to add code that could take up
-      to a millisecond or so to run.
-    *******/
+      }        
+    }    
   }
-
-  /******
-     Don't add code here, because it could slow the sampling
-     from the PulseSensor.
-  ******/
 }
